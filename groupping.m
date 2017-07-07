@@ -1,26 +1,26 @@
-function [gr_u, gr_size, gr_t_size, gr_v_size, group] = groupping(n_user, n_group, train_vec)
+function [gr_u, gr_size, gr_t_size, gr_v_size, group] = groupping(n_user, n_group, gr_div, train_vec)
   % variables
-  n_gr_u    = floor(n_user / n_group); % user population within groups
-  group     = cell(n_group, 2);        % groupped ratings
-  gr_size   = zeros(n_group, 1);       % group sizes
-  gr_t_size = zeros(n_group, 1);       % group training size
-  gr_v_size = zeros(n_group, 1);       % group verification size
+  aux       = floor(gr_div(1) * n_user);
+  n_gr_u    = [aux, n_user - aux]; % user population within groups
+  group     = cell(n_group, 2);    % groupped ratings
+  gr_size   = zeros(n_group, 1);   % group sizes
+  gr_t_size = zeros(n_group, 1);   % group training size
+  gr_v_size = zeros(n_group, 1);   % group verification size
+  clear aux;
   
-  if mod(n_user, n_group) == 0
-    r_perm = randperm(n_user);
-  else
-    r_perm = randperm(n_user - mod(n_user, n_group));
-  end
+  gr_u   = [zeros(n_user, 1), zeros(n_user, 1)];
+  r_perm = randperm(n_user);
   
-  gr_u = transpose([r_perm(1:n_gr_u); r_perm(n_gr_u + 1:end)]);
+  gr_u(1:n_gr_u(1), 1) = transpose(r_perm(1:n_gr_u(1)));
+  gr_u(1:n_gr_u(2), 2) = transpose(r_perm(n_gr_u(1)+1:end));
 
   for g = 1:n_group
     aux = zeros(size(train_vec, 1), 3);
   
     % creating a group
     buff = 0;
-    for j = 1:n_gr_u
-      aux_loc = train_vec(train_vec(:,1) == r_perm((g - 1) * n_gr_u + j),:);
+    for j = 1:n_gr_u(g)
+      aux_loc = train_vec(train_vec(:,1) == r_perm((g-1) * n_gr_u(1) - (g-1) + j),:);
       for i=1:size(aux_loc, 1)
         aux(buff + i, :) = aux_loc(i, :);
       end
