@@ -1,6 +1,8 @@
 function [fake1, fake2] = generate(n_item, n_group, gr_u, gr_t_size, group)
+  gen = 2; % depending on the density of the dataset
   for g=1:n_group
-    gen    = 2; % depending on the density of the dataset
+    n_gr_u = gr_u(:,g); 
+    n_gr_u(n_gr_u == 0) = [];
     fake   = zeros(gr_t_size(g) * gen, 2);
     gr_t   = cell2mat(group(g, 1));
     gr_v   = cell2mat(group(g, 2));
@@ -8,7 +10,7 @@ function [fake1, fake2] = generate(n_item, n_group, gr_u, gr_t_size, group)
     
     % chosing user-item pair
     for j=1:gr_t_size(g) * gen
-      aux_u      = gr_u(randi(size(gr_u, 1)), g);
+      aux_u      = n_gr_u(randi(size(n_gr_u, 1)));
       aux_i      = randi(n_item);
       fake(j, :) = [aux_u, aux_i];
     end

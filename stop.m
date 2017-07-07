@@ -1,5 +1,5 @@
 function ind = stop(type, toleration, iter, buffer, rmse, g)
-  init  = 10;  % skipping the first x iteration
+  init  = 30;  % skipping the first x iteration
   ind   = 0;
   other = 3 - g;
   if iter > buffer + init;
