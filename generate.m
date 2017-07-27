@@ -1,5 +1,6 @@
-function [fake1, fake2] = generate(n_item, n_group, gr_u, gr_t_size, group)
+function out = generate(n_item, n_group, gr_u, gr_t_size, group)
   gen = 2; % depending on the density of the dataset
+  out = cell(1, 2);
   for g=1:n_group
     n_gr_u = gr_u(:,g); 
     n_gr_u(n_gr_u == 0) = [];
@@ -32,8 +33,8 @@ function [fake1, fake2] = generate(n_item, n_group, gr_u, gr_t_size, group)
     aux = aux / size(rat, 1);
     pd  = makedist('Multinomial', 'probabilities', aux);
     
-    % 1m:    1- 2- 3- 4- 5
-    % 10m20m:1-1.5...4.5-5
+    % 100k/1m: 1- 2- 3- 4- 5
+    % 10m/20m: 1-1.5...4.5-5
     if size(rat_ty, 1) > 5
       fake = [fake, random(pd , size(fake, 1), 1) / 2];
     else
@@ -44,10 +45,6 @@ function [fake1, fake2] = generate(n_item, n_group, gr_u, gr_t_size, group)
     fake   = fake(r_perm, :);
     fake   = fake(1:gr_t_size(g), :);
     
-    if g == 1
-      fake1 = fake;
-    else
-      fake2 = fake;
-    end
+    out(1, g) = mat2cell(fake, gr_t_size(g), 3);
   end
     

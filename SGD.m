@@ -1,16 +1,27 @@
-function SGD(priv, mal_gr_n, mal_type, dat)
+function SGD(priv, mal_type, dat)
   clearvars -except priv mal_gr_n mal_type dat
-  fprintf(1, 'Dat/Mal/Pri/Typ\t%s/%1i/%1.2f/%s\n', ...
-          dat, mal_gr_n, priv, mal_type);
+  fprintf(1, 'Dat/Pri/Typ\t%s/%1.2f/%1.2f/%s/%s\n', ...
+          dat, priv, mal_type);
   
   % parameters
-  epsilon    = 25;   % learning rate
   lambda     = 0.01; % regularization
   iter       = 0;    % iterator
   max_iter   = 200;  % iteration
   n_features = 10;   % number of features
   n_group    = 2;    % number of groups
-  gr_div     = [1/5, 4/5]; % division of groups
+  gr_div     = [1/2, 1/2]; % division of groups
+  
+  % learning rate
+  switch dat
+    case '100k'
+      epsilon = 6.25;
+    case '1m'
+      epsilon = 25;
+    case '10m'
+      epsilon = 100;
+    case '20m'
+      epsilon = 150;
+  end
   
   % stopping parameters
   s_type     = ['siz'; 'siz'; 'siz'; 'dir'; 'dir'; 'dir'];
@@ -31,21 +42,14 @@ function SGD(priv, mal_gr_n, mal_type, dat)
   %usefulness = zeros(max_iter, n_group); % value of iteration
   
   % groupping
-  [gr_u, gr_size, gr_t_size, gr_v_size, group] = ...
-            groupping(n_user, n_group, gr_div, train_vec);
+  %[gr_u, gr_size, gr_t_size, gr_v_size, group] = ...
+  %          groupping(n_user, n_group, gr_div, train_vec);
   %data = strcat('data/', dat, '/g', dat(1:end-1), '.mat');
   %load(data);
-  load('data/1m/33g.mat');
+  load('data/1m/g1.mat');
   
   % generate fake ratings
-  [fake1, fake2] = generate(n_item, n_group, gr_u, gr_t_size, group);
-  if mal_gr_n == 1
-    fake = fake1;
-  else
-    fake = fake2;
-  end
-  clear fake1;
-  clear fake2;
+  fake = generate(n_item, n_group, gr_u, gr_t_size, group);
   
   % compute error
   %fprintf(1, 'Starting RMSE\n');
@@ -53,9 +57,12 @@ function SGD(priv, mal_gr_n, mal_type, dat)
                               lambda, zeros(n_group, 1), iter, rmse, []);
   
   % manipulate group
-  if priv > 0
-    [group, gr_size, gr_t_size] = manipulate( ...
-      mal_gr_n, gr_size, gr_t_size, gr_v_size, group, mal_type, priv, fake);
+  for g=1:n_group
+    in = cell2mat(fake(1,g));
+    if priv(g) > 0
+      [group, gr_size, gr_t_size] = manipulate( ...
+       g, gr_size, gr_t_size, gr_v_size, group, mal_type(g,:), priv(g), in);
+    end
   end
   
   while iter < max_iter
@@ -92,7 +99,7 @@ function SGD(priv, mal_gr_n, mal_type, dat)
   fprintf(1, '\niter\t%3i\t%3i\t%3i\t%3i\t%3i\t%3i', stopped(1,:));
   fprintf(1, '\niter\t%3i\t%3i\t%3i\t%3i\t%3i\t%3i\n', stopped(2,:));
       
-  %fprintf(1, 'Final RMSE\n%1.8f\t%1.8f\n', pre_rmse);
+  fprintf(1, 'Final RMSE\n%1.8f\t%1.8f\n', pre_rmse);
   
   % hadling rmse
   init = 1; % skipping the first x iteration
