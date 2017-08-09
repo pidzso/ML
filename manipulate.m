@@ -43,4 +43,34 @@ switch type
     new_s   = gr_size;
     new_t_s = gr_t_size;
     
+    case 'dif'
+    mal_gr  = cell2mat(group(mal_gr_n, 1));
+    rat     = mal_gr(:, 3);
+    inf     = min(rat);
+    sup     = max(rat);
+    
+    aux = rand(size(mal_gr, 1), 1) - 0.5;
+    lap = (sup - inf) / (priv * sqrt(2)) * sign(aux).* log(1 - 2* abs(aux));
+    
+    rat0 = rat + lap;
+    rat0(rat0 > sup) = sup;
+    rat0(rat0 < inf) = inf;
+    if priv > 0
+      fprintf(1, 'Avg. Ch.: %1.2f\n', sum(abs(rat - rat0)) / size(rat, 1));
+    end
+    clear rat0;
+    
+    rat = rat + lap;
+    rat(rat > sup) = sup;
+    rat(rat < inf) = inf;
+    mal_gr(:, 3) = rat;
+    
+    clear rat;
+    clear aux;
+    clear lap;
+    
+    group(mal_gr_n, 1) = mat2cell(mal_gr, size(mal_gr, 1), size(mal_gr, 2));
+    mal                = group;
+    new_s              = gr_size;
+    new_t_s            = gr_t_size;
 end
