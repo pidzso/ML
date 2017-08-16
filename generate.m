@@ -2,12 +2,12 @@ function out = generate(n_item, n_group, gr_u, gr_t_size, group)
   gen = 2; % depending on the density of the dataset
   out = cell(1, 2);
   for g=1:n_group
-    n_gr_u = gr_u(:,g); 
+    n_gr_u = gr_u(:, g); 
     n_gr_u(n_gr_u == 0) = [];
     fake   = zeros(gr_t_size(g) * gen, 2);
     gr_t   = cell2mat(group(g, 1));
     gr_v   = cell2mat(group(g, 2));
-    gr_all = [gr_t(:,1), gr_t(:,2); gr_v(:,1), gr_v(:,2)];
+    gr_all = [gr_t(:, 1), gr_t(:, 2); gr_v(:, 1), gr_v(:, 2)];
     
     % chosing user-item pair
     for j=1:gr_t_size(g) * gen
@@ -23,23 +23,7 @@ function out = generate(n_item, n_group, gr_u, gr_t_size, group)
     
     % generate ratings
     rat    = [gr_t(:, 3); gr_v(:, 3)];
-    rat_ty = unique(rat);
-    aux    = zeros(size(rat_ty, 1), 1);
-    
-    for i=1:size(rat_ty, 1)
-      aux(i) = size(rat(rat == rat_ty(i)), 1);
-    end
-    
-    aux = aux / size(rat, 1);
-    pd  = makedist('Multinomial', 'probabilities', aux);
-    
-    % 100k/1m: 1- 2- 3- 4- 5
-    % 10m/20m: 1-1.5...4.5-5
-    if size(rat_ty, 1) > 5
-      fake = [fake, random(pd , size(fake, 1), 1) / 2];
-    else
-      fake = [fake, random(pd , size(fake, 1), 1)];
-    end
+    fake = [fake, randn(size(fake, 1), 1)];
     
     r_perm = randperm(size(fake, 1));
     fake   = fake(r_perm, :);
@@ -47,4 +31,5 @@ function out = generate(n_item, n_group, gr_u, gr_t_size, group)
     
     out(1, g) = mat2cell(fake, gr_t_size(g), 3);
   end
+end
     

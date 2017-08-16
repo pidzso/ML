@@ -1,12 +1,12 @@
-function [mal, new_s, new_t_s] = manipulate( ...
-         mal_gr_n, gr_size, gr_t_size, gr_v_size, group, type, priv, fake)
+function [mal, new_s, new_t_s] = manipulate(mal_gr_n, gr_size, ...
+          gr_t_size, gr_v_size, group, type, priv, fake)
 switch type
   case 'hid'
     mal_gr = cell2mat(group(mal_gr_n, 1));
     r_perm = randperm(gr_t_size(mal_gr_n));
     mal_gr = mal_gr(r_perm,:);
     
-    mal_gr(1:floor(priv * gr_t_size(mal_gr_n)),:) = [];
+    mal_gr(1:floor(priv * gr_t_size(mal_gr_n)), :) = [];
     gr_size(mal_gr_n)   = size(mal_gr, 1) + gr_v_size(mal_gr_n);
     gr_t_size(mal_gr_n) = size(mal_gr, 1);
     
@@ -18,11 +18,11 @@ switch type
   case 'ran'
     mal_gr  = cell2mat(group(mal_gr_n, 1));
     r_perm1 = randperm(size(mal_gr, 1));
-    mal_gr  = mal_gr(r_perm1,:);
+    mal_gr  = mal_gr(r_perm1, :);
     r_perm2 = randperm(size(fake, 1));
     fake    = fake(r_perm2, :);
     
-    mal_gr(1:floor(priv * size(mal_gr, 1)), 3) = fake(1:floor(priv * size(mal_gr, 1)), 3);
+    mal_gr(1:floor(priv * size(mal_gr, 1)), :) = fake(1:floor(priv * size(mal_gr, 1)), :);
     
     group(mal_gr_n, 1) = mat2cell(mal_gr, size(mal_gr, 1), size(mal_gr, 2));
     mal                = group;
@@ -33,6 +33,8 @@ switch type
     r_perm = randperm(size(fake, 1));
     fake   = fake(r_perm, :);
     mal_gr = [cell2mat(group(mal_gr_n, 1)); fake(1:floor(priv * gr_t_size(mal_gr_n)), :)];
+    r_perm = randperm(size(mal_gr, 1));
+    mal_gr = mal_gr(r_perm, :);
 
     % adding
     group(mal_gr_n, 1)  = mat2cell(mal_gr, size(mal_gr, 1), size(mal_gr, 2));
@@ -46,23 +48,13 @@ switch type
     case 'dif'
     mal_gr  = cell2mat(group(mal_gr_n, 1));
     rat     = mal_gr(:, 3);
-    inf     = min(rat);
-    sup     = max(rat);
+    bound   = 2; % TODO
     
     aux = rand(size(mal_gr, 1), 1) - 0.5;
-    lap = (sup - inf) / (priv * sqrt(2)) * sign(aux).* log(1 - 2* abs(aux));
-    
-    rat0 = rat + lap;
-    rat0(rat0 > sup) = sup;
-    rat0(rat0 < inf) = inf;
-    if priv > 0
-      fprintf(1, 'Avg. Ch.: %1.2f\n', sum(abs(rat - rat0)) / size(rat, 1));
-    end
-    clear rat0;
+    lap = 2 * bound / (priv * sqrt(2)) * sign(aux).* log(1 - 2 * abs(aux));
     
     rat = rat + lap;
-    rat(rat > sup) = sup;
-    rat(rat < inf) = inf;
+    rat = bounding(rat, bound);
     mal_gr(:, 3) = rat;
     
     clear rat;
