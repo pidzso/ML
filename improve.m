@@ -9,9 +9,7 @@ function [new_i, new_u] = improve(f_item, f_user, n_features, max_iter, ...
     % compute predictions
     pred  = sum(f_item(actual_i, :) .* f_user(actual_u, :), 2);
     
-    pred = bounding(pred, 1);
-    
-    % compute gradients
+    % compute pre gradients
     err   = repmat(pred - actual_r, 1, n_features);
     err = bounding(err, bound_err);
     reg_i = err .* f_user(actual_u, :) + lambda * f_item(actual_i, :);

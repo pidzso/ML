@@ -7,8 +7,6 @@ function [post_rmse, new_r] = cal_rmse(n_group, group, f_item, f_user, ...
     ver_i = double(ver(:, 2));
     ver_r = double(ver(:, 3));
     ver_p = sum(f_item(ver_i, :) .* f_user(ver_u, :), 2);
-    
-    ver_p = bounding(ver_p, 1);
 
     error = sum((ver_p - ver_r).^2 + 0.5 * lambda * ...
             (sum((f_item(ver_i, :).^2 + f_user(ver_u, :).^2), 2)));
