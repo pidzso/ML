@@ -1,4 +1,4 @@
-load('data/10m/10m.mat');
+load('data/10m/10m.mat')
 
 x = full(train_vec(:, 1));
 y = full(train_vec(:, 2));
@@ -21,17 +21,17 @@ rem_y = ismember(y, rem_item) .* y;
 % shrink dataset
 train_vec = [rem_x, rem_y, z];
 rem_train_vec = train_vec;
-rem_train_vec(any(train_vec==0, 2), :) = [];
+rem_train_vec(any(train_vec==0,2),:) = [];
 train_vec = rem_train_vec;
 
-uniQ = sort(unique(train_vec(:, 2)));
+uniQ = sort(unique(train_vec(:,2)));
 all = train_vec(:, 2);
 for i = 1:size(uniQ)
     all( all == uniQ(i) ) = i;
 end
 train_vec(:, 2) = all;
 
-uniQ = sort(unique(train_vec(:, 1)));
+uniQ = sort(unique(train_vec(:,1)));
 all = train_vec(:, 1);
 for i = 1:size(uniQ)
     all( all == uniQ(i) ) = i;

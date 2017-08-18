@@ -6,7 +6,7 @@ switch type
     r_perm = randperm(gr_t_size(mal_gr_n));
     mal_gr = mal_gr(r_perm,:);
     
-    mal_gr(1:floor(priv * gr_t_size(mal_gr_n)), :) = [];
+    mal_gr(1:floor(priv * gr_t_size(mal_gr_n)),:) = [];
     gr_size(mal_gr_n)   = size(mal_gr, 1) + gr_v_size(mal_gr_n);
     gr_t_size(mal_gr_n) = size(mal_gr, 1);
     
@@ -45,7 +45,28 @@ switch type
     new_s   = gr_size;
     new_t_s = gr_t_size;
     
-    case 'dif'
+    case 'bdp'
+    mal_gr  = cell2mat(group(mal_gr_n, 1));
+    rat     = mal_gr(:, 3);
+    bound   = 2; % TODO
+    
+    aux = rand(size(mal_gr, 1), 1) - 0.5;
+    lap = 2 * bound / (priv * sqrt(2)) * sign(aux).* log(1 - 2 * abs(aux));
+    
+    rat = rat + lap;
+    rat = bounding(rat, bound);
+    mal_gr(:, 3) = rat;
+    
+    clear rat;
+    clear aux;
+    clear lap;
+    
+    group(mal_gr_n, 1) = mat2cell(mal_gr, size(mal_gr, 1), size(mal_gr, 2));
+    mal                = group;
+    new_s              = gr_size;
+    new_t_s            = gr_t_size;
+    
+  case 'udp' % TODO
     mal_gr  = cell2mat(group(mal_gr_n, 1));
     rat     = mal_gr(:, 3);
     bound   = 2; % TODO

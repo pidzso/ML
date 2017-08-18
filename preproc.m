@@ -16,7 +16,7 @@ function [pr_d, pr_i, pr_u, pr_r, avg_u, avg_i] = preproc(data)
     aux = size(pr_d);
     
     for i=1:size(item_rat, 2)
-      if item_rat(i)< item_bound
+      if item_rat(i) < item_bound
         new_i(new_i == items(i)) = 0;
       end
     end
@@ -33,8 +33,8 @@ function [pr_d, pr_i, pr_u, pr_r, avg_u, avg_i] = preproc(data)
       end
     end
     for u=1:size(new_u)
-      if new_i(u) == 0
-        new_u(u) = 0;
+      if new_u(u) == 0
+        new_i(u) = 0;
         new_r(u) = 0;
       end
     end
