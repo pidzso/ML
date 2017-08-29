@@ -14,7 +14,6 @@ function [new_i, new_u] = improve(f_item, f_user, n_features, max_iter, ...
     err = bounding(err, bound_err);
     reg_i = err .* f_user(actual_u, :) + lambda * f_item(actual_i, :);
     reg_u = err .* f_item(actual_i, :) + lambda * f_user(actual_u, :);
-    clear err;
 
     grad_i = zeros(n_item, n_features);
     grad_u = zeros(n_user, n_features);
@@ -24,9 +23,6 @@ function [new_i, new_u] = improve(f_item, f_user, n_features, max_iter, ...
       grad_u(actual_u(j), :) = grad_u(actual_u(j), :) +  reg_u(j, :);
     end
     
-    clear reg_i;
-    clear reg_u;
-    
     sens = epsilon * (bound_err * bound_f + lambda * bound_f);
     grad_i = noise(n_item, n_features, grad_i, max_iter, ...
                    epsilon, sens, mal_type, priv, g);
@@ -34,6 +30,3 @@ function [new_i, new_u] = improve(f_item, f_user, n_features, max_iter, ...
     % update features
     new_u = f_user - epsilon * grad_u;
     new_i = f_item - grad_i;
-      
-    clear grad_u;
-    clear grad_i;

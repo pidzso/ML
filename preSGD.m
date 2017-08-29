@@ -55,12 +55,13 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
   
   % manipulate group
   if sum(ismember(['hid'; 'ran'; 'add'; 'bdp'; 'udp'], mal_type, 'rows')) > 0
+    sens = epsilon * (bound_err * bound_f + lambda * bound_f);
     fake = generate(proc_i, n_group, gr_u, gr_t_size, group);
     for g=1:n_group
       in = cell2mat(fake(1, g));
       if priv(g) > 0
         [group, gr_size, gr_t_size] = manipulate(g, gr_size, gr_t_size, ...
-         gr_v_size, group, mal_type(g,:), priv(g), in);
+         gr_v_size, group, gr_u, mal_type(g, :), priv(g), sens, bound_rat, in);
       end
     end
   end

@@ -6,7 +6,6 @@ function [gr_u, gr_size, gr_t_size, gr_v_size, group] = groupping(n_user, n_grou
   gr_size   = zeros(n_group, 1);   % group sizes
   gr_t_size = zeros(n_group, 1);   % group training size
   gr_v_size = zeros(n_group, 1);   % group verification size
-  clear aux;
   
   gr_u   = [zeros(n_user, 1), zeros(n_user, 1)];
   r_perm = randperm(n_user);
@@ -27,8 +26,6 @@ function [gr_u, gr_size, gr_t_size, gr_v_size, group] = groupping(n_user, n_grou
       buff = buff + size(aux_loc, 1);
     end
     aux( ~any(aux, 2), : ) = [];
-    clear aux_loc;
-    clear buff;
 
     % local variables
     aux_perm   = randperm(size(aux, 1));
@@ -42,11 +39,5 @@ function [gr_u, gr_size, gr_t_size, gr_v_size, group] = groupping(n_user, n_grou
     aux_v        = aux(gr_t_size(g) + 1:end, :);
     group(g, 1)  = mat2cell(aux_tr, gr_t_size(g), 3);
     group(g, 2)  = mat2cell(aux_v, gr_v_size(g), 3);
-    clear s;
-    clear aux;
-    clear aux_tr;
-    clear aux_v;
-    clear aux_perm;
   end
-  clear train_vec;
 end

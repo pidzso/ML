@@ -11,7 +11,6 @@ function metric = contribution(n_group, n_item, f_item, f_prev, iter, g)
     % remove NaN
     ix = isnan(metric_loc(:, g));
     metric_loc(find(ix), g) = 0;
-    clear ix;
   end
   metric = sum(metric_loc(:, g)) / n_item;
 end

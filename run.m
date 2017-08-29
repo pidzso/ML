@@ -1,54 +1,16 @@
-%div = [1/10, 10/10];
-%preSGD([0, 0], ['pgd'; 'pgd'], div, '1m', '1');
-%preSGD([0, 0], ['pgd'; 'pgd'], div, '1m', '2');
-%preSGD([0, 0], ['pgd'; 'pgd'], div, '1m', 'all');
-%preSGD([log(10), 0], ['pgd'; 'pgd'], div, '1m', 'all');
-%preSGD([0.5, 0], ['ran'; 'pgd'], div, '1m', 'all');
-%preSGD([1, 0], ['add'; 'pgd'], div, '1m', 'all');
-%preSGD([log(10), 0], ['bdp'; 'pgd'], div, '1m', 'all');
-%preSGD([log(10), 0], ['udp'; 'pgd'], div, '1m', 'all');
-%preSGD([0.5, 0], ['hid'; 'pgd'], div, '1m', 'all');
-%preSGD([0, log(10)], ['pgd'; 'pgd'], div, '1m', 'all');
-%preSGD([log(10), log(10)], ['pgd'; 'pgd'], div, '1m', 'all');
+dataset = '1m';
+privacy = 'udp';
 
-preSGD([0, 0], ['pgd'; 'pgd'], [1/11, 10/11], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/10, 9/10], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/9, 8/9], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/8, 7/8], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/7, 6/7], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/6, 5/6], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/5, 4/5], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/4, 3/4], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/3, 2/3], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/2, 1/2], '1m', 'all');
+for div=[1,2,4,8]
+    preSGD([0, 0], [privacy; privacy], [1/(1+div),div/(div+1)], dataset, '1');
+    preSGD([0, 0], [privacy; privacy], [1/(1+div),div/(div+1)], dataset, '2');
+    preSGD([0, 0], [privacy; privacy], [1/(1+div),div/(div+1)], dataset, 'all');
+    
+    preSGD([0.1, 0], [privacy; privacy], [1/(1+div),div/(div+1)], dataset, 'all');
+    preSGD([1, 0],   [privacy; privacy], [1/(1+div),div/(div+1)], dataset, 'all');
+    preSGD([10, 0],  [privacy; privacy], [1/(1+div),div/(div+1)], dataset, 'all');
 
-preSGD([0, 0], ['pgd'; 'pgd'], [1/11, 10/11], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/11, 10/11], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/11, 10/11], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/10, 9/10], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/10, 9/10], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/10, 9/10], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/9, 8/9], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/9, 8/9], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/9, 8/9], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/8, 7/8], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/8, 7/8], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/8, 7/8], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/7, 6/7], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/7, 6/7], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/7, 6/7], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/6, 5/6], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/6, 5/6], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/6, 5/6], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/5, 4/5], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/5, 4/5], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/5, 4/5], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/4, 3/4], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/4, 3/4], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/4, 3/4], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/3, 2/3], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/3, 2/3], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/3, 2/3], '1m', 'all');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/2, 1/2], '1m', '1');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/2, 1/2], '1m', '2');
-preSGD([0, 0], ['pgd'; 'pgd'], [1/2, 1/2], '1m', 'all');
+    preSGD([0, 0.1], [privacy; privacy], [1/(1+div),div/(div+1)], dataset, 'all');
+    preSGD([0, 1],   [privacy; privacy], [1/(1+div),div/(div+1)], dataset, 'all');
+    preSGD([0, 10],  [privacy; privacy], [1/(1+div),div/(div+1)], dataset, 'all');
+end

@@ -22,7 +22,7 @@ function out = generate(n_item, n_group, gr_u, gr_t_size, group)
     fake      = setxor(fake, duplicate, 'rows');
     
     % generate ratings
-    rat    = [gr_t(:, 3); gr_v(:, 3)];
+    rat  = [gr_t(:, 3); gr_v(:, 3)];
     fake = [fake, randn(size(fake, 1), 1)];
     
     r_perm = randperm(size(fake, 1));

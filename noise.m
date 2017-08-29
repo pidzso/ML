@@ -10,7 +10,7 @@ function new_grd = noise(n_item, n_features, grad_i, ...
   else
     new_grd = epsilon * grad_i;
   end
-    %new_grd(new_grd>0)=0.1;
-    %new_grd(new_grd<=0)=-0.1;
+    %new_grd(new_grd > 0)  = 0.1;
+    %new_grd(new_grd <= 0) = -0.1;
     new_grd = bounding(new_grd, 0.1); % TODO
 end
