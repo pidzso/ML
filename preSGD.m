@@ -3,9 +3,9 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
   fprintf(1, 'Dat/Div/Pri/Typ\t%s/%s/%1.2f-%1.2f/%s-%s\n', ...
           dat, strcat(num2str(gr_div(1) * 10), '-', num2str(gr_div(2) * 10)), ...
           priv, mal_type(1,:), mal_type(2,:));
-  
+      
   [lambda, max_iter, n_features, n_group, epsilon, ...
-          bound_f, bound_avg, bound_err, bound_rat, ...
+          bound_f, bound_avg, bound_rat, ...
           s_type, toleration, buffer, stopped] = param(dat);
   rmse = zeros(max_iter, n_group, n_group); % group error
   
@@ -42,7 +42,7 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
   
   % compute error
   [pre_rmse, rmse] = cal_rmse(n_group, group, f_item, f_user, ...
-   lambda, zeros(n_group, 1), 0, rmse, []);
+   bound_rat, lambda, zeros(n_group, 1), 0, rmse, []);
   fprintf(1, 'Start RMSE\t%1.8f\t%1.8f\n', pre_rmse(1), pre_rmse(2));
   
   % initialize features
@@ -55,7 +55,9 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
   
   % manipulate group
   if sum(ismember(['hid'; 'ran'; 'add'; 'bdp'; 'udp'], mal_type, 'rows')) > 0
-    sens = epsilon * (bound_err * bound_f + lambda * bound_f);
+    % TODO
+    sens = max_iter * n_features * epsilon * ...
+           (2 * bound_rat * bound_f + lambda * bound_f);
     fake = generate(proc_i, n_group, gr_u, gr_t_size, group);
     for g=1:n_group
       in = cell2mat(fake(1, g));
@@ -67,5 +69,5 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
   end
   [g1, g2] = SGD(f_item, f_user, n_features, proc_i, proc_u, ...
       pre_rmse, rmse, n_group, group, gr_t_size, mal_type, priv, ...
-      join, max_iter, bound_f, bound_err, lambda, epsilon);
+      join, max_iter, bound_f, bound_rat, lambda, epsilon);
 end

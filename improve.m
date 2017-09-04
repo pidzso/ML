@@ -1,5 +1,5 @@
 function [new_i, new_u] = improve(f_item, f_user, n_features, max_iter, ...
-                          bound_f, bound_err, priv, n_item, n_user, ...
+                          bound_f, bound_rat, priv, n_item, n_user, ...
                           lambda, epsilon, actual_g, gr_t_size, g, mal_type)
       
   actual_u = double(actual_g(:, 1));
@@ -8,10 +8,11 @@ function [new_i, new_u] = improve(f_item, f_user, n_features, max_iter, ...
 
     % compute predictions
     pred  = sum(f_item(actual_i, :) .* f_user(actual_u, :), 2);
+    pred = bounding(pred, bound_rat);
     
     % compute pre gradients
     err   = repmat(pred - actual_r, 1, n_features);
-    err = bounding(err, bound_err);
+    err = bounding(err, 2 * bound_rat);
     reg_i = err .* f_user(actual_u, :) + lambda * f_item(actual_i, :);
     reg_u = err .* f_item(actual_i, :) + lambda * f_user(actual_u, :);
 
@@ -23,7 +24,7 @@ function [new_i, new_u] = improve(f_item, f_user, n_features, max_iter, ...
       grad_u(actual_u(j), :) = grad_u(actual_u(j), :) +  reg_u(j, :);
     end
     
-    sens = epsilon * (bound_err * bound_f + lambda * bound_f);
+    sens = epsilon * (2 * bound_rat * bound_f + lambda * bound_f);
     grad_i = noise(n_item, n_features, grad_i, max_iter, ...
                    epsilon, sens, mal_type, priv, g);
     

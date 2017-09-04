@@ -6,7 +6,7 @@ function [mal, new_s, new_t_s] = manipulate(mal_gr_n, gr_size, gr_t_size, ...
     r_perm = randperm(gr_t_size(mal_gr_n));
     mal_gr = mal_gr(r_perm,:);
     
-    mal_gr(1:floor(priv * gr_t_size(mal_gr_n)),:) = [];
+    mal_gr(1:floor(priv * gr_t_size(mal_gr_n)), :) = [];
     gr_size(mal_gr_n)   = size(mal_gr, 1) + gr_v_size(mal_gr_n);
     gr_t_size(mal_gr_n) = size(mal_gr, 1);
     
@@ -104,7 +104,6 @@ function [mal, new_s, new_t_s] = manipulate(mal_gr_n, gr_size, gr_t_size, ...
     end
     
     mal_gr = mal_gr(1:ind-1, :);
-    mal_gr(:, 3) = bounding(mal_gr(:, 3), 2); % bound TODO
     
     group(mal_gr_n, 1)  = mat2cell(mal_gr, size(mal_gr, 1), size(mal_gr, 2));
     gr_size(mal_gr_n)   = size(mal_gr, 1) + gr_v_size(mal_gr_n);

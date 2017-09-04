@@ -1,5 +1,5 @@
 function [lambda, max_iter, n_features, n_group, epsilon, ...
-          bound_f, bound_avg, bound_err, bound_rat, ...
+          bound_f, bound_avg, bound_rat, ...
           s_type, toleration, buffer, stopped] = param(dat)
   
   lambda     = 0.01;     % regularization
@@ -7,7 +7,6 @@ function [lambda, max_iter, n_features, n_group, epsilon, ...
   n_features = 4;        % number of features
   bound_f    = 0.5;      % feature bound
   bound_avg  = 2;        % user average bound
-  bound_err  = 4;        % error bound
   bound_rat  = 2;        % rating bound
   n_group    = 2;        % number of groups
   epsilon    = 7.5/1000; % learning rate
