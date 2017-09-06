@@ -1,8 +1,7 @@
 function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
   clearvars -except priv mal_type gr_div dat join
-  fprintf(1, 'Dat/Div/Pri/Typ\t%s/%s/%1.2f-%1.2f/%s-%s\n', ...
-          dat, strcat(num2str(gr_div(1) * 10), '-', num2str(gr_div(2) * 10)), ...
-          priv, mal_type(1,:), mal_type(2,:));
+  fprintf(1, '%s/1:%i/%1.2f-%1.2f/%s-%s\n', dat, ...
+          gr_div(2) / gr_div(1), priv, mal_type(1,:), mal_type(2,:));
       
   [lambda, max_iter, n_features, n_group, epsilon, ...
           bound_f, bound_avg, bound_rat, ...
@@ -34,9 +33,9 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
   % groupping
   data = strcat('data/', dat, '/', num2str(gr_div(1) * 10), ...
                 '-', num2str(gr_div(2) * 10), '.mat');
-%  [gr_u, gr_size, gr_t_size, gr_v_size, group] = ...
-%            groupping(proc_u, n_group, gr_div, proc_d);
-%  save(data, 'gr_u', 'gr_size', 'gr_t_size', 'gr_v_size', 'group');
+  [gr_u, gr_size, gr_t_size, gr_v_size, group] = ...
+            groupping(proc_u, n_group, gr_div, proc_d);
+  save(data, 'gr_u', 'gr_size', 'gr_t_size', 'gr_v_size', 'group');
   load(data);
   clear data;
   
@@ -58,7 +57,10 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
     % TODO
     sens = max_iter * n_features * epsilon * ...
            (2 * bound_rat * bound_f + lambda * bound_f);
-    fake = generate(proc_i, n_group, gr_u, gr_t_size, group);
+    fake = cell(1, 2);
+    if sum(ismember(['ran'; 'add'], mal_type, 'rows')) > 0
+      fake = generate(proc_i, n_group, gr_u, gr_t_size, group);
+    end
     for g=1:n_group
       in = cell2mat(fake(1, g));
       if priv(g) > 0

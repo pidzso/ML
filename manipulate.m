@@ -68,42 +68,44 @@ function [mal, new_s, new_t_s] = manipulate(mal_gr_n, gr_size, gr_t_size, ...
     oth_gr   = cell2mat(group(3-mal_gr_n, 1));
     oth_v_gr = cell2mat(group(3-mal_gr_n, 2));
     
+    org = size(mal_gr, 1);
+    
+    % create rating matrix
     mx = zeros(size(union(union(mal_gr(:, 1), mal_v_gr(:, 1)), ...
                           union(oth_gr(:, 1), oth_v_gr(:, 1))), 1), ...
                size(union(union(mal_gr(:, 2), mal_v_gr(:, 2)), ...
                           union(oth_gr(:, 2), oth_v_gr(:, 2))), 1));
-    
+    % set ratings
     for i=1:size(mal_gr, 1)
       mx(mal_gr(i, 1), mal_gr(i, 2)) = mal_gr(i, 3);
     end
     
+    % add noise
     aux = rand(size(mx)) - 0.5;
     lap = sens / (priv * sqrt(2)) * sign(aux).* log(1 - 2 * abs(aux));
-    
     mx = mx + lap;
     
-    % clamping 
-    mx(abs(mx) < 0.5) = 0; % TODO
-    
+    % bound ratings
     mx = bounding(mx, bound);
+    
+    % remove verify set
     for i=1:size(mal_v_gr, 1)
       mx(mal_v_gr(i, 1), mal_v_gr(i, 2)) = 0;
     end
     
-    mal_gr = zeros(size(mx, 1) * size(mx, 2), 3);
-    ind = 1;
-    for i=1:size(mx, 1)
-      if ismember(i, gr_u(:, mal_gr_n))
-        for j=1:size(mx, 2)
-          if mx(i, j) ~= 0
-            mal_gr(ind, :) = [i, j, mx(i, j)];
-            ind = ind + 1;
-          end
-        end
-      end
-    end
+    % remove other group's set
+    mx(oth_gr(:, 1), :)   = 0;
+    mx(oth_v_gr(:, 1), :) = 0;
     
-    mal_gr = mal_gr(1:ind-1, :);
+    % clamping 
+    mx(abs(mx) < 0.5) = 0;
+    aux = rand(size(mx(abs(mx) == 2), 1), 1) < 0.1;
+    mx(abs(mx) == 2) = aux .* mx(abs(mx) == 2);
+    
+    [u, i, r] = find(mx);
+    mal_gr    = [u, i, r];
+    
+    fprintf(1, 'Size Change\t%f\n', size(mal_gr, 1) / org);
     
     group(mal_gr_n, 1)  = mat2cell(mal_gr, size(mal_gr, 1), size(mal_gr, 2));
     gr_size(mal_gr_n)   = size(mal_gr, 1) + gr_v_size(mal_gr_n);
