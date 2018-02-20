@@ -14,7 +14,8 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
 %  clear data;
   
   % preprocess data
-  data = strcat('data/', dat, '/proc_', dat, '.mat');
+%  data = strcat('data/', dat, '/proc_', dat, '.mat');
+  data = strcat('data/netflix/proc_netflix.mat');
 %  [proc_d, proc_i, proc_u, proc_r, avg_u, avg_i] = preproc(train_vec);
 %  avg_u = bounding(avg_u, bound_avg);
 %  proc_d(:, 3) = bounding(proc_d(:, 3), bound_rat);
@@ -31,11 +32,12 @@ function [g1, g2] = preSGD(priv, mal_type, gr_div, dat, join)
 %  usefulness = zeros(max_iter, n_group); % value of iteration
   
   % groupping
-  data = strcat('data/', dat, '/', num2str(gr_div(1) * 10), ...
-                '-', num2str(gr_div(2) * 10), '.mat');
-  [gr_u, gr_size, gr_t_size, gr_v_size, group] = ...
-            groupping(proc_u, n_group, gr_div, proc_d);
-  save(data, 'gr_u', 'gr_size', 'gr_t_size', 'gr_v_size', 'group');
+%  data = strcat('data/', dat, '/', num2str(gr_div(1) * 10), ...
+%                '-', num2str(gr_div(2) * 10), '.mat');
+  data = strcat('data/netflix/G3/5-5/', dat);
+%  [gr_u, gr_size, gr_t_size, gr_v_size, group] = ...
+%            groupping(proc_u, n_group, gr_div, proc_d);
+%  save(data, 'gr_u', 'gr_size', 'gr_t_size', 'gr_v_size', 'group');
   load(data);
   clear data;
   

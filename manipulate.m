@@ -105,7 +105,7 @@ function [mal, new_s, new_t_s] = manipulate(mal_gr_n, gr_size, gr_t_size, ...
     [u, i, r] = find(mx);
     mal_gr    = [u, i, r];
     
-    fprintf(1, 'Size Change\t%f\n', size(mal_gr, 1) / org);
+%    fprintf(1, 'Size Change\t%f\n', size(mal_gr, 1) / org);
     
     group(mal_gr_n, 1)  = mat2cell(mal_gr, size(mal_gr, 1), size(mal_gr, 2));
     gr_size(mal_gr_n)   = size(mal_gr, 1) + gr_v_size(mal_gr_n);
