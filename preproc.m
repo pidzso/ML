@@ -1,22 +1,21 @@
-function [pr_d, pr_i, pr_u, pr_r, avg_u, avg_i] = preproc(data)
+function [pr_d, pr_i, pr_u, pr_r, avg_u, avg_i] = preproc(data, limit)
   pr_d  = data; 
   new_u = data(:, 1);
   new_i = data(:, 2);
   new_r = data(:, 3);
-%  avg_g = sum(new_d(:,3)) / n_rating;
   [user_rat, users] = hist( new_u, unique(new_u));
   [item_rat, items] = hist( new_i, unique(new_i));
   
-  % remove outliers
-  item_bound = 10;
-  user_bound = 10;
-  
+  % remove outliers  
   ind = 0;
   while ind == 0
+  
+    fprintf(1, 'filtering\n');
+    
     aux = size(pr_d);
     
     for i=1:size(item_rat, 2)
-      if item_rat(i) < item_bound
+      if item_rat(i) < limit
         new_i(new_i == items(i)) = 0;
       end
     end
@@ -28,7 +27,7 @@ function [pr_d, pr_i, pr_u, pr_r, avg_u, avg_i] = preproc(data)
     end
     
     for u=1:size(user_rat, 2)
-      if user_rat(u) < user_bound
+      if user_rat(u) < limit
         new_u(new_u == users(u)) = 0;
       end
     end
@@ -48,12 +47,16 @@ function [pr_d, pr_i, pr_u, pr_r, avg_u, avg_i] = preproc(data)
     end
   end
   
+  fprintf(1, 'recounting users\n');
+  
   uniQ = sort(unique(pr_d(:, 1)));
   all   = pr_d(:, 1);
   for u = 1:size(uniQ)
     all( all == uniQ(u) ) = u;
   end
   pr_d(:, 1) = all;
+  
+  fprintf(1, 'recounting items\n');
   
   uniQ = sort(unique(pr_d(:, 2)));
   all   = pr_d(:, 2);
@@ -66,18 +69,22 @@ function [pr_d, pr_i, pr_u, pr_r, avg_u, avg_i] = preproc(data)
   pr_i = max(pr_d(:, 2));
   pr_r = size(pr_d, 1);
   
-  [n_user_rat, n_users] = hist( new_u, unique(new_u));
-  [n_item_rat, n_items] = hist( new_i, unique(new_i));
+  [n_user_rat, n_users] = hist(new_u, unique(new_u));
+  [n_item_rat, n_items] = hist(new_i, unique(new_i));
   
   % calculate item/user averages
   avg_i = n_items;
   avg_u = n_users;
+  
+  fprintf(1, 'averaging items\n');
   
   for i=1:pr_i
     aux = pr_d(pr_d(:, 2) == i, 3);
     avg_i(i) = sum(aux) / n_item_rat(i);
     pr_d(pr_d(:, 2) == i, 3) = aux - avg_i(i);
   end
+  
+  fprintf(1, 'averaging users\n');
   
   for u=1:pr_u
     aux = pr_d(pr_d(:, 1) == u, 3);

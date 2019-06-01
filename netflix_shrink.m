@@ -5,7 +5,7 @@ y = full(train_vec(:, 2));
 z = full(train_vec(:, 3));
 
 % chose random users
-shrink_user = 0.33;
+shrink_user = 0.5;
 rem_user = 1:max(x);
 rem_user = rem_user(randperm(max(x)));
 rem_user = rem_user(1:floor(max(x) * shrink_user));
