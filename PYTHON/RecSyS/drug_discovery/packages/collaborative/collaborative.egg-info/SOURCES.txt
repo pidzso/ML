@@ -1,0 +1,9 @@
+README.md
+setup.py
+collaborative/__init__.py
+collaborative/participant.py
+collaborative/test.py
+collaborative.egg-info/PKG-INFO
+collaborative.egg-info/SOURCES.txt
+collaborative.egg-info/dependency_links.txt
+collaborative.egg-info/top_level.txt
