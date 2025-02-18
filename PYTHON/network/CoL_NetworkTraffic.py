@@ -47,13 +47,12 @@ local_params = {
     'initial_split_ratio': 0.5,
     'test_split_ratio': 0.2,
     'epochs': 2,
-    'local_epochs': 4,
     'federated_rounds': 2,
     'batch_size': 256,
     'learning_rate': 0.001,
     'input_dim': None,
     'num_classes': None,
-    "noise_levels": [None, 1.00],
+    "noise_levels": [None, 1.00],  # CHANGE HERE privacy-NOISE parameters
     "max_grad_norm": 1.0,
 }
 
@@ -111,11 +110,12 @@ def average_models(model_p1, model_p2):
 
 
 def train_local_model(model, train_loader, criterion, optimizer, round_num):
-    """Train a model locally for specified number of epochs"""
+    """Train a model locally for FL for specified number of epochs"""
     model.train()
     epochs_data = []
 
-    for epoch in range(local_params['local_epochs']):
+    for epoch in range(local_params['epochs']):
+        print('\t\t\t\tEpoch ', epoch)
         running_loss = 0.0
         correct_predictions = 0
         total_samples = 0
@@ -148,10 +148,12 @@ def train_local_model(model, train_loader, criterion, optimizer, round_num):
 
 
 def train_model(model, train_loader, criterion, optimizer):
+    """Train a local baseline model"""
     model.train()
     epochs_data = []
     
-    for epoch in range(local_params['epochs']):
+    for epoch in range(local_params['epochs'] * local_params['federated_rounds']):
+        print('\t\tRound ', epoch)
         running_loss = 0.0
         correct_predictions = 0
         total_samples = 0
@@ -193,6 +195,7 @@ def train_local_dp_model(model, train_loader, criterion, optimizer, round_num, n
         "noise_norms": []
     }
     if noise_multiplier is not None:
+        model.train()
         history["epsilons"] = []
         privacy_engine = PrivacyEngine()
         model, optimizer, train_loader = privacy_engine.make_private(
@@ -204,7 +207,8 @@ def train_local_dp_model(model, train_loader, criterion, optimizer, round_num, n
             clipping="flat",
             poisson_sampling=True
         )
-    for epoch in range(round_num):
+    for epoch in range(local_params['epochs']):
+        print('\t\t\t\t\tEpoch ', epoch)
         model.train()
         epoch_loss, correct, total = 0.0, 0, 0
         grad_norms, noise_norms = [], []
@@ -286,8 +290,7 @@ def generate_feature_combinations():
     """Generate all possible feature combinations for privacy experiments"""
     num_features = len(local_params['feature_columns'])
     combinations = []
-
-    # Generate combinations
+    # CHANGE HERE privacy-SUP parameters
     for num_features_to_keep in [14, 7]:  # range(num_features, 0, -3):
         selected_features = local_params['feature_columns'][:num_features_to_keep]
         combinations.append(selected_features)
@@ -537,7 +540,7 @@ def run_local(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_tes
     train_loader_p1, test_loader_p1 = create_data_loaders(X_p1_train, X_p1_test, y_p1_train, y_p1_test)
     train_loader_p2, test_loader_p2 = create_data_loaders(X_p2_train, X_p2_test, y_p2_train, y_p2_test)
 
-    print("\ttrain 1 / 2")
+    print("\tPlayer 1")
     # Train and evaluate Model M1
     model_M1 = NeuralNetwork(local_params['input_dim'], local_params['num_classes'])
     criterion = nn.CrossEntropyLoss()
@@ -555,7 +558,7 @@ def run_local(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_tes
         'P2': {'loss': loss_M1_p2, 'accuracy': acc_M1_p2}
     }
 
-    print("\ttrain 2 / 2")
+    print("\tPlayer 2")
     # Train and evaluate Model M2
     model_M2 = NeuralNetwork(local_params['input_dim'], local_params['num_classes'])
     optimizer_M2 = optim.Adam(model_M2.parameters(), lr=local_params['learning_rate'])
@@ -611,9 +614,9 @@ def run_fl(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test, 
     global_model = NeuralNetwork(local_params['input_dim'], local_params['num_classes'])
     criterion = nn.CrossEntropyLoss()
 
-    print("\ttrain 1 / 1")
     # Federated Learning Rounds
     for round_num in range(1, local_params['federated_rounds'] + 1):
+        print('\t\tRound ', round_num)
 
         # Initialize local models with global model parameters
         model_p1 = deepcopy(global_model)
@@ -623,7 +626,9 @@ def run_fl(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test, 
         optimizer_p1 = optim.Adam(model_p1.parameters(), lr=local_params['learning_rate'])
         optimizer_p2 = optim.Adam(model_p2.parameters(), lr=local_params['learning_rate'])
 
+        print('\t\t\tPlayer 1')
         model_p1, epochs_data_p1 = train_local_model(model_p1, train_loader_p1, criterion, optimizer_p1, round_num)
+        print('\t\t\tPlayer 2')
         model_p2, epochs_data_p2 = train_local_model(model_p2, train_loader_p2, criterion, optimizer_p2, round_num)
 
         # Aggregate models
@@ -680,6 +685,7 @@ def run_dp_exp(X_p1_train, X_p1_test, X_p2_train, X_p2_test, y_p1_train, y_p1_te
 
     # Federated Learning Rounds
     for round_num in range(1, local_params['federated_rounds'] + 1):
+        print('\t\tRound ', round_num)
 
         # Initialize local models
         model_p1 = deepcopy(global_model)
@@ -689,7 +695,9 @@ def run_dp_exp(X_p1_train, X_p1_test, X_p2_train, X_p2_test, y_p1_train, y_p1_te
         optimizer_p1 = optim.Adam(model_p1.parameters(), lr=local_params['learning_rate'])
         optimizer_p2 = optim.Adam(model_p2.parameters(), lr=local_params['learning_rate'])
 
+        print('\t\t\tPlayer 1')
         model_p1, epochs_data_p1 = train_local_dp_model(model_p1, train_loader_p1, criterion, optimizer_p1, round_num, p1_noise)
+        print('\t\t\tPlayer 2')
         model_p2, epochs_data_p2 = train_local_dp_model(model_p2, train_loader_p2, criterion, optimizer_p2, round_num, p2_noise)
 
         # Aggregate models
@@ -754,7 +762,7 @@ def run_dp(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test, 
 
     for p1_noise, p2_noise in product(local_params['noise_levels'], local_params['noise_levels']):
         current_experiment += 1
-        print("\ttrain ", current_experiment, ' / ', (len(local_params['noise_levels']) * len(local_params['noise_levels'])))
+        print("\tExp ", current_experiment, ' / ', (len(local_params['noise_levels']) * len(local_params['noise_levels'])))
         experiment_id = f"exp_{current_experiment}"
 
         # Run experiment
@@ -809,6 +817,7 @@ def run_sup_exp(X_p1_train, X_p1_test, X_p2_train, X_p2_test, y_p1_train, y_p1_t
 
     # Federated Learning Rounds
     for round_num in range(1, local_params['federated_rounds'] + 1):
+        print('\t\tRound ', round_num)
 
         # Initialize local models
         model_p1 = deepcopy(global_model)
@@ -818,7 +827,9 @@ def run_sup_exp(X_p1_train, X_p1_test, X_p2_train, X_p2_test, y_p1_train, y_p1_t
         optimizer_p1 = optim.Adam(model_p1.parameters(), lr=local_params['learning_rate'])
         optimizer_p2 = optim.Adam(model_p2.parameters(), lr=local_params['learning_rate'])
 
+        print('\t\t\tPlayer 1')
         model_p1, epochs_data_p1 = train_local_model(model_p1, train_loader_p1, criterion, optimizer_p1, round_num)
+        print('\t\t\tPlayer 2')
         model_p2, epochs_data_p2 = train_local_model(model_p2, train_loader_p2, criterion, optimizer_p2, round_num)
 
         # Aggregate models
@@ -886,7 +897,7 @@ def run_sup(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test,
 
     for p1_features, p2_features in product(feature_combinations, feature_combinations):
         current_experiment += 1
-        print("\ttrain ", current_experiment, ' / ', (len(feature_combinations) * len(feature_combinations)))
+        print("\tExp ", current_experiment, ' / ', (len(feature_combinations) * len(feature_combinations)))
         experiment_id = f"exp_{current_experiment}"
 
         # Run experiment
@@ -916,73 +927,73 @@ def main():
      X_p21_train, X_p21_test, y_p21_train, y_p21_test,
      X_p22_train, X_p22_test, y_p22_train, y_p22_test) = prepare_data(args.seed)
 
-    print("local baseline ...")
+    print("Baseline ...")
     set_seed(args.seed)
     loc_res = run_local(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test, y_p2_train, y_p2_test)
     with open('1_local_baseline/' + str(args.seed) + '.json', 'w') as f:
         json.dump(loc_res, f, indent=4)
 
-    print("federated baseline ...")
-    set_seed(args.seed)
-    fl_res = run_fl(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test, y_p2_train, y_p2_test)
-    with open('2_fl_baseline/' + str(args.seed) + '.json', 'w') as f:
-        json.dump(fl_res, f, indent=4)
+    #print("Federated ...")
+    #set_seed(args.seed)
+    #fl_res = run_fl(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test, y_p2_train, y_p2_test)
+    #with open('2_fl_baseline/' + str(args.seed) + '.json', 'w') as f:
+    #    json.dump(fl_res, f, indent=4)
 
-    print("federated suppression ...")
+    print("Suppression ...")
     set_seed(args.seed)
     sup_res = run_sup(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test, y_p2_train, y_p2_test)
     with open('3_suppression/' + str(args.seed) + '.json', 'w') as f:
         json.dump(sup_res, f, indent=4)
 
-    print("federated noise ...")
+    print("Noise ...")
     set_seed(args.seed)
     dp_res = run_dp(X_p1_train, X_p1_test, y_p1_train, y_p1_test, X_p2_train, X_p2_test, y_p2_train, y_p2_test)
     with open('4_noise/' + str(args.seed) + '.json', 'w') as f:
         json.dump(dp_res, f, indent=4)
 
-    print("P1 simulated local baseline ...")
+    print("P1 Simulated Local ...")
     set_seed(args.seed)
     loc_res = run_local(X_p11_train, X_p11_test, y_p11_train, y_p11_test, X_p12_train, X_p12_test, y_p12_train, y_p12_test)
     with open('1_local_baseline/P1/' + str(args.seed) + '.json', 'w') as f:
         json.dump(loc_res, f, indent=4)
 
-    print("P1 simulated federated baseline ...")
-    set_seed(args.seed)
-    fl_res = run_fl(X_p11_train, X_p11_test, y_p11_train, y_p11_test, X_p12_train, X_p12_test, y_p12_train, y_p12_test)
-    with open('2_fl_baseline/P1/' + str(args.seed) + '.json', 'w') as f:
-        json.dump(fl_res, f, indent=4)
+    #print("P1 Simulated Federated ...")
+    #set_seed(args.seed)
+    #fl_res = run_fl(X_p11_train, X_p11_test, y_p11_train, y_p11_test, X_p12_train, X_p12_test, y_p12_train, y_p12_test)
+    #with open('2_fl_baseline/P1/' + str(args.seed) + '.json', 'w') as f:
+    #    json.dump(fl_res, f, indent=4)
 
-    print("P1 simulated federated suppression ...")
+    print("P1 simulated Suppression ...")
     set_seed(args.seed)
     sup_res = run_sup(X_p11_train, X_p11_test, y_p11_train, y_p11_test, X_p12_train, X_p12_test, y_p12_train, y_p12_test)
     with open('3_suppression/P1/' + str(args.seed) + '.json', 'w') as f:
         json.dump(sup_res, f, indent=4)
 
-    print("P1 simulated federated noise ...")
+    print("P1 Simulated Noise ...")
     set_seed(args.seed)
     dp_res = run_dp(X_p11_train, X_p11_test, y_p11_train, y_p11_test, X_p12_train, X_p12_test, y_p12_train, y_p12_test)
     with open('4_noise/P1/' + str(args.seed) + '.json', 'w') as f:
         json.dump(dp_res, f, indent=4)
 
-    print("P2 simulated local baseline ...")
+    print("P2 Simulated Local ...")
     set_seed(args.seed)
     loc_res = run_local(X_p21_train, X_p21_test, y_p21_train, y_p21_test, X_p22_train, X_p22_test, y_p22_train, y_p22_test)
     with open('1_local_baseline/P2/' + str(args.seed) + '.json', 'w') as f:
         json.dump(loc_res, f, indent=4)
 
-    print("P2 simulated federated baseline ...")
-    set_seed(args.seed)
-    fl_res = run_fl(X_p21_train, X_p21_test, y_p21_train, y_p21_test, X_p22_train, X_p22_test, y_p22_train, y_p22_test)
-    with open('2_fl_baseline/P2/' + str(args.seed) + '.json', 'w') as f:
-        json.dump(fl_res, f, indent=4)
+    #print("P2 Simulated Federated ...")
+    #set_seed(args.seed)
+    #fl_res = run_fl(X_p21_train, X_p21_test, y_p21_train, y_p21_test, X_p22_train, X_p22_test, y_p22_train, y_p22_test)
+    #with open('2_fl_baseline/P2/' + str(args.seed) + '.json', 'w') as f:
+    #    json.dump(fl_res, f, indent=4)
 
-    print("P2 simulated federated suppression ...")
+    print("P2 Simulated Suppression ...")
     set_seed(args.seed)
     sup_res = run_sup(X_p21_train, X_p21_test, y_p21_train, y_p21_test, X_p22_train, X_p22_test, y_p22_train, y_p22_test)
     with open('3_suppression/P2/' + str(args.seed) + '.json', 'w') as f:
         json.dump(sup_res, f, indent=4)
 
-    print("P2 simulated federated noise ...")
+    print("P2 simulated Noise ...")
     set_seed(args.seed)
     dp_res = run_dp(X_p21_train, X_p21_test, y_p21_train, y_p21_test, X_p22_train, X_p22_test, y_p22_train, y_p22_test)
     with open('4_noise/P2/' + str(args.seed) + '.json', 'w') as f:

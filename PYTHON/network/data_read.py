@@ -73,9 +73,9 @@ def plot(mx, ttl, params):
     return plt
 
 
-experiments = [0, 1]
-supp = [14, 7]
-noise = [0.00, 1.00]
+experiments = [1, 2]  # SET HERE seed parameters
+supp = [14, 7]  # CHANGE HERE privacy-SUP parameters
+noise = [0.00, 1.00]  # CHANGE HERE privacy-NOISE parameters
 for j, setting in enumerate(['3_suppression/', '3_suppression/P1/', '3_suppression/P2/', '4_noise/', '4_noise/P1/', '4_noise/P2/']):
     if j < 3:
         method = 'Suppression'
@@ -92,6 +92,9 @@ for j, setting in enumerate(['3_suppression/', '3_suppression/P1/', '3_suppressi
     p1_loss, p1_acc = split_matrix(avg1)
     p2_loss, p2_acc = split_matrix(avg2)
     for i, matrix in enumerate([p1_loss, p1_acc, p2_loss, p2_acc]):
+        print('p1_loss')
+        for row in matrix:
+            print(" ".join(map(str, row)))
         if i == 0 or i == 1:
             player = '1'
         if i == 2 or i == 3:
