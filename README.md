@@ -14,6 +14,7 @@
 # Collaborative Learning (PYTHON)
  - Scaling SD
  - Monotonization
+ - Network Traffic Use Case
  
-# Collaborative ame (MATHEMATICA)
+# Collaborative Game (MATHEMATICA)
  - NE calculation
